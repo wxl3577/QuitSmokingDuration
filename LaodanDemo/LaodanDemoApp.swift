@@ -1,10 +1,11 @@
 import SwiftUI
 
 @main
-struct LaodanDemoApp: App {
+struct QuitSmokingDurationApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
 }
+

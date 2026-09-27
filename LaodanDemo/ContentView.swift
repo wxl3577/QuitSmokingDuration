@@ -1,14 +1,25 @@
+import Foundation
 import SwiftUI
 
 struct ContentView: View {
     @AppStorage("quitStartTimestamp") private var quitStartTimestamp: Double = 0
+    @AppStorage("dailyCigaretteCount") private var dailyCigaretteCount: Int = 0
+    @AppStorage("cigarettePackPrice") private var cigarettePackPrice: Double = 0
 
     var body: some View {
         Group {
-            if quitStartTimestamp > 0 {
-                MainTabView(startTimestamp: $quitStartTimestamp)
+            if quitStartTimestamp > 0 && dailyCigaretteCount > 0 && cigarettePackPrice > 0 {
+                MainTabView(
+                    startTimestamp: $quitStartTimestamp,
+                    dailyCigaretteCount: $dailyCigaretteCount,
+                    cigarettePackPrice: $cigarettePackPrice
+                )
             } else {
-                StartSetupView(startTimestamp: $quitStartTimestamp)
+                StartSetupView(
+                    startTimestamp: $quitStartTimestamp,
+                    dailyCigaretteCount: $dailyCigaretteCount,
+                    cigarettePackPrice: $cigarettePackPrice
+                )
             }
         }
         .preferredColorScheme(.light)
@@ -17,10 +28,16 @@ struct ContentView: View {
 
 private struct MainTabView: View {
     @Binding var startTimestamp: Double
+    @Binding var dailyCigaretteCount: Int
+    @Binding var cigarettePackPrice: Double
 
     var body: some View {
         TabView {
-            DashboardView(startDate: Date(timeIntervalSince1970: startTimestamp))
+            DashboardView(
+                startDate: Date(timeIntervalSince1970: startTimestamp),
+                dailyCigaretteCount: dailyCigaretteCount,
+                cigarettePackPrice: cigarettePackPrice
+            )
                 .tabItem {
                     Label("进度", systemImage: "chart.bar.fill")
                 }
@@ -30,7 +47,11 @@ private struct MainTabView: View {
                     Label("巩固", systemImage: "book.closed.fill")
                 }
 
-            SettingsView(startTimestamp: $startTimestamp)
+            SettingsView(
+                startTimestamp: $startTimestamp,
+                dailyCigaretteCount: $dailyCigaretteCount,
+                cigarettePackPrice: $cigarettePackPrice
+            )
                 .tabItem {
                     Label("设置", systemImage: "slider.horizontal.3")
                 }
@@ -41,7 +62,30 @@ private struct MainTabView: View {
 
 private struct StartSetupView: View {
     @Binding var startTimestamp: Double
-    @State private var selectedDate = Date()
+    @Binding var dailyCigaretteCount: Int
+    @Binding var cigarettePackPrice: Double
+    @State private var selectedDate: Date
+    @State private var draftDailyCount: Int
+    @State private var draftPackPrice: Double
+
+    init(
+        startTimestamp: Binding<Double>,
+        dailyCigaretteCount: Binding<Int>,
+        cigarettePackPrice: Binding<Double>
+    ) {
+        _startTimestamp = startTimestamp
+        _dailyCigaretteCount = dailyCigaretteCount
+        _cigarettePackPrice = cigarettePackPrice
+
+        let savedTimestamp = startTimestamp.wrappedValue
+        _selectedDate = State(
+            initialValue: savedTimestamp > 0
+                ? Date(timeIntervalSince1970: savedTimestamp)
+                : Date()
+        )
+        _draftDailyCount = State(initialValue: max(dailyCigaretteCount.wrappedValue, 20))
+        _draftPackPrice = State(initialValue: max(cigarettePackPrice.wrappedValue, 20))
+    }
 
     var body: some View {
         ZStack {
@@ -66,7 +110,9 @@ private struct StartSetupView: View {
                             .font(.system(size: 36, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.ink)
 
-                        Text("先记录你的开始时间，之后每一秒都会被认真保存。")
+                        Text(startTimestamp > 0
+                            ? "再补充两项吸烟信息，就能实时计算你省下的钱。"
+                            : "记录开始时间和过去的吸烟习惯，之后每一秒都会被认真保存。")
                             .font(.system(size: 17))
                             .foregroundColor(AppTheme.secondaryText)
                             .fixedSize(horizontal: false, vertical: true)
@@ -89,11 +135,71 @@ private struct StartSetupView: View {
                     }
                     .shadow(color: Color.black.opacity(0.05), radius: 20, y: 10)
 
+                    VStack(alignment: .leading, spacing: 20) {
+                        Label("以前的吸烟习惯", systemImage: "banknote.fill")
+                            .font(.headline)
+                            .foregroundColor(AppTheme.ink)
+
+                        Divider()
+
+                        Stepper(value: $draftDailyCount, in: 1...100) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("每日烟量")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundColor(AppTheme.ink)
+                                    Text("按每天平均数量填写")
+                                        .font(.caption)
+                                        .foregroundColor(AppTheme.secondaryText)
+                                }
+
+                                Spacer()
+
+                                Text("\(draftDailyCount) 根")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .monospacedDigit()
+                                    .foregroundColor(AppTheme.accent)
+                            }
+                        }
+
+                        Divider()
+
+                        Stepper(value: $draftPackPrice, in: 1...500, step: 0.5) {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text("每盒价格")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundColor(AppTheme.ink)
+                                    Text("每盒按20根计算")
+                                        .font(.caption)
+                                        .foregroundColor(AppTheme.secondaryText)
+                                }
+
+                                Spacer()
+
+                                Text("¥\(MoneyText.price(draftPackPrice))")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .monospacedDigit()
+                                    .foregroundColor(AppTheme.accent)
+                            }
+                        }
+                    }
+                    .padding(22)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                    }
+                    .shadow(color: Color.black.opacity(0.05), radius: 20, y: 10)
+
                     Button {
                         startTimestamp = selectedDate.timeIntervalSince1970
+                        dailyCigaretteCount = draftDailyCount
+                        cigarettePackPrice = draftPackPrice
                     } label: {
                         HStack {
-                            Text("开始记录")
+                            Text(startTimestamp > 0 ? "保存并继续" : "开始记录")
                                 .font(.headline)
                             Spacer()
                             Image(systemName: "arrow.right")
@@ -119,6 +225,8 @@ private struct StartSetupView: View {
 
 private struct DashboardView: View {
     let startDate: Date
+    let dailyCigaretteCount: Int
+    let cigarettePackPrice: Double
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { timeline in
@@ -132,6 +240,7 @@ private struct DashboardView: View {
                     VStack(spacing: 18) {
                         header
                         durationCard(elapsed)
+                        savingsCard(asOf: timeline.date)
                         milestoneCard(milestone)
                         startDateCard
                     }
@@ -234,6 +343,58 @@ private struct DashboardView: View {
             .frame(width: 1, height: 34)
     }
 
+    private func savingsCard(asOf now: Date) -> some View {
+        let elapsedSeconds = max(0, now.timeIntervalSince(startDate))
+        let avoidedCigarettes = elapsedSeconds / 86_400 * Double(dailyCigaretteCount)
+        let savedMoney = avoidedCigarettes / 20 * cigarettePackPrice
+
+        return VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("累计省下")
+                        .font(.subheadline)
+                        .foregroundColor(AppTheme.secondaryText)
+                    Text("截至现在的实时估算")
+                        .font(.caption)
+                        .foregroundColor(AppTheme.secondaryText)
+                }
+
+                Spacer()
+
+                Image(systemName: "banknote.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(AppTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(AppTheme.accent.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text("¥")
+                    .font(.title2.weight(.semibold))
+                    .foregroundColor(AppTheme.accent)
+
+                Text(MoneyText.amount(savedMoney))
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(AppTheme.ink)
+                    .minimumScaleFactor(0.65)
+                    .lineLimit(1)
+            }
+
+            Text("按每日 \(dailyCigaretteCount) 根、每盒 ¥\(MoneyText.price(cigarettePackPrice))（20根）计算")
+                .font(.caption)
+                .foregroundColor(AppTheme.secondaryText)
+        }
+        .padding(21)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+        }
+    }
+
     private func milestoneCard(_ milestone: Milestone) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
@@ -304,13 +465,21 @@ private struct DashboardView: View {
 
 private struct SettingsView: View {
     @Binding var startTimestamp: Double
+    @Binding var dailyCigaretteCount: Int
+    @Binding var cigarettePackPrice: Double
     @State private var draftDate: Date
     @State private var isEditingStartDate = false
     @State private var showSavedNotice = false
     @State private var showResetConfirmation = false
 
-    init(startTimestamp: Binding<Double>) {
+    init(
+        startTimestamp: Binding<Double>,
+        dailyCigaretteCount: Binding<Int>,
+        cigarettePackPrice: Binding<Double>
+    ) {
         _startTimestamp = startTimestamp
+        _dailyCigaretteCount = dailyCigaretteCount
+        _cigarettePackPrice = cigarettePackPrice
         _draftDate = State(initialValue: Date(timeIntervalSince1970: startTimestamp.wrappedValue))
     }
 
@@ -322,6 +491,7 @@ private struct SettingsView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 18) {
                         settingsCard
+                        smokingProfileCard
                         resetCard
 
                         Text("所有设置仅保存在这台设备上。")
@@ -407,6 +577,70 @@ private struct SettingsView: View {
                     .frame(height: 52)
                     .background(AppTheme.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+        }
+        .padding(20)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+        }
+    }
+
+    private var smokingProfileCard: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(spacing: 13) {
+                Image(systemName: "banknote.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(AppTheme.accent)
+                    .frame(width: 44, height: 44)
+                    .background(AppTheme.accent.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("省钱计算设置")
+                        .font(.headline)
+                        .foregroundColor(AppTheme.ink)
+                    Text("修改后，首页金额会立即重新计算")
+                        .font(.caption)
+                        .foregroundColor(AppTheme.secondaryText)
+                }
+            }
+
+            Divider()
+
+            Stepper(value: $dailyCigaretteCount, in: 1...100) {
+                HStack {
+                    Text("每日烟量")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(AppTheme.ink)
+                    Spacer()
+                    Text("\(dailyCigaretteCount) 根")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(AppTheme.accent)
+                }
+            }
+
+            Divider()
+
+            Stepper(value: $cigarettePackPrice, in: 1...500, step: 0.5) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("每盒价格")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(AppTheme.ink)
+                        Text("每盒按20根")
+                            .font(.caption)
+                            .foregroundColor(AppTheme.secondaryText)
+                    }
+                    Spacer()
+                    Text("¥\(MoneyText.price(cigarettePackPrice))")
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundColor(AppTheme.accent)
+                }
             }
         }
         .padding(20)
@@ -584,6 +818,18 @@ private enum AppTheme {
     static let ink = Color(red: 0.08, green: 0.12, blue: 0.12)
     static let secondaryText = Color(red: 0.38, green: 0.43, blue: 0.42)
     static let pageBackground = Color(red: 0.955, green: 0.965, blue: 0.95)
+}
+
+private enum MoneyText {
+    static func amount(_ value: Double) -> String {
+        String(format: "%.2f", value)
+    }
+
+    static func price(_ value: Double) -> String {
+        value.rounded() == value
+            ? String(format: "%.0f", value)
+            : String(format: "%.1f", value)
+    }
 }
 
 private enum DateTextFormatter {

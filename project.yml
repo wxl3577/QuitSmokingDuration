@@ -25,6 +25,7 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: "Laodan Demo"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: NO
         CODE_SIGN_STYLE: Automatic

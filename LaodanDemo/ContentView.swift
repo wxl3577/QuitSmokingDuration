@@ -14,210 +14,213 @@ struct ContentView: View {
         return components.date!
     }()
 
+    private let accent = Color(red: 0.12, green: 0.31, blue: 0.24)
+    private let pageBackground = Color(red: 0.955, green: 0.952, blue: 0.935)
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { timeline in
             let elapsed = ElapsedTime(from: Self.startDate, to: timeline.date)
+            let milestone = Milestone.current(for: elapsed.days)
 
             ZStack {
-                background
+                pageBackground.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 18) {
                         header
-                        dayCard(days: elapsed.days)
-                        timeCards(elapsed: elapsed)
-                        startCard
-                        encouragement
+                        durationCard(elapsed)
+                        milestoneCard(milestone)
+                        startDateCard
+
+                        Text("时间会在应用打开时持续更新")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 4)
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 18)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 30)
                 }
             }
         }
-        .preferredColorScheme(.dark)
-    }
-
-    private var background: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.035, green: 0.075, blue: 0.105),
-                    Color(red: 0.035, green: 0.145, blue: 0.145),
-                    Color(red: 0.025, green: 0.055, blue: 0.085)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
-            Circle()
-                .fill(Color.teal.opacity(0.20))
-                .frame(width: 280, height: 280)
-                .blur(radius: 70)
-                .offset(x: 150, y: -280)
-
-            Circle()
-                .fill(Color.orange.opacity(0.12))
-                .frame(width: 240, height: 240)
-                .blur(radius: 75)
-                .offset(x: -170, y: 310)
-        }
+        .preferredColorScheme(.light)
     }
 
     private var header: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [.teal, .mint],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 48, height: 48)
-
-                Image(systemName: "lungs.fill")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("戒烟时长")
-                    .font(.title2.bold())
-                Text("记录每一次自由呼吸")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.58))
+                    .font(.system(size: 24, weight: .semibold))
+                    .foregroundStyle(Color.primary)
+
+                Text("从决定开始，到现在")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            HStack(spacing: 6) {
+            HStack(spacing: 7) {
                 Circle()
-                    .fill(Color.mint)
+                    .fill(accent)
                     .frame(width: 7, height: 7)
-                    .shadow(color: .mint, radius: 5)
-                Text("进行中")
-                    .font(.caption.weight(.semibold))
+                Text("记录中")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(accent)
             }
-            .padding(.horizontal, 11)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(.white.opacity(0.08), in: Capsule())
+            .background(accent.opacity(0.08), in: Capsule())
         }
     }
 
-    private func dayCard(days: Int) -> some View {
-        VStack(spacing: 12) {
+    private func durationCard(_ elapsed: ElapsedTime) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
             Text("已经坚持")
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(.white.opacity(0.62))
+                .foregroundStyle(.secondary)
 
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("\(days)")
-                    .font(.system(size: 82, weight: .bold, design: .rounded))
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("\(elapsed.days)")
+                    .font(.system(size: 86, weight: .semibold, design: .default))
+                    .tracking(-3)
                     .monospacedDigit()
-                    .minimumScaleFactor(0.55)
+                    .minimumScaleFactor(0.6)
+                    .foregroundStyle(Color.primary)
+
                 Text("天")
-                    .font(.title2.bold())
-                    .foregroundStyle(.mint)
+                    .font(.title2.weight(.medium))
+                    .foregroundStyle(accent)
+            }
+            .padding(.top, 6)
+
+            Rectangle()
+                .fill(Color.primary.opacity(0.09))
+                .frame(height: 1)
+                .padding(.vertical, 22)
+
+            HStack(spacing: 0) {
+                TimeValue(value: elapsed.hours, label: "小时")
+                divider
+                TimeValue(value: elapsed.minutes, label: "分钟")
+                divider
+                TimeValue(value: elapsed.seconds, label: "秒")
+            }
+        }
+        .padding(24)
+        .background(Color.white, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.black.opacity(0.05), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.045), radius: 18, y: 8)
+    }
+
+    private var divider: some View {
+        Rectangle()
+            .fill(Color.primary.opacity(0.08))
+            .frame(width: 1, height: 34)
+    }
+
+    private func milestoneCard(_ milestone: Milestone) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("下一个里程碑")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                Text("\(milestone.target) 天")
+                    .font(.headline.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(accent)
             }
 
-            Label("你正在持续赢回健康", systemImage: "heart.fill")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.mint)
+            ProgressView(value: milestone.progress)
+                .tint(accent)
+                .scaleEffect(x: 1, y: 1.7, anchor: .center)
+
+            HStack {
+                Text("已完成 \(Int(milestone.progress * 100))%")
+                Spacer()
+                Text("还差 \(milestone.remaining) 天")
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 30)
-        .background(
-            LinearGradient(
-                colors: [.white.opacity(0.14), .white.opacity(0.06)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            in: RoundedRectangle(cornerRadius: 30, style: .continuous)
-        )
+        .padding(20)
+        .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .stroke(.white.opacity(0.13), lineWidth: 1)
-        }
-        .shadow(color: .black.opacity(0.22), radius: 24, y: 14)
-    }
-
-    private func timeCards(elapsed: ElapsedTime) -> some View {
-        HStack(spacing: 12) {
-            TimeUnitCard(value: elapsed.hours, unit: "时")
-            TimeUnitCard(value: elapsed.minutes, unit: "分")
-            TimeUnitCard(value: elapsed.seconds, unit: "秒", highlighted: true)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.black.opacity(0.045), lineWidth: 1)
         }
     }
 
-    private var startCard: some View {
-        HStack(spacing: 15) {
-            Image(systemName: "calendar.badge.clock")
-                .font(.system(size: 25, weight: .medium))
-                .foregroundStyle(.orange)
-                .frame(width: 48, height: 48)
-                .background(Color.orange.opacity(0.14), in: RoundedRectangle(cornerRadius: 15))
+    private var startDateCard: some View {
+        HStack(spacing: 14) {
+            Image(systemName: "calendar")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(accent)
+                .frame(width: 38, height: 38)
+                .background(accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text("开始戒烟")
+            VStack(alignment: .leading, spacing: 4) {
+                Text("开始时间")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(.secondary)
                 Text("2025年11月12日 22:51")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.subheadline.weight(.medium))
                     .monospacedDigit()
+                    .foregroundStyle(Color.primary)
             }
 
             Spacer(minLength: 0)
         }
         .padding(18)
-        .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 22))
+        .background(Color.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 22)
-                .stroke(.white.opacity(0.08), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.black.opacity(0.045), lineWidth: 1)
         }
-    }
-
-    private var encouragement: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "leaf.fill")
-                .font(.title3)
-                .foregroundStyle(.mint)
-            Text("每一个清醒的呼吸，\n都在让身体变得更自由。")
-                .font(.footnote.weight(.medium))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.white.opacity(0.58))
-                .lineSpacing(4)
-        }
-        .padding(.top, 4)
     }
 }
 
-private struct TimeUnitCard: View {
+private struct TimeValue: View {
     let value: Int
-    let unit: String
-    var highlighted = false
+    let label: String
 
     var body: some View {
-        VStack(spacing: 7) {
+        VStack(spacing: 5) {
             Text(String(format: "%02d", value))
-                .font(.system(size: 30, weight: .bold, design: .rounded))
+                .font(.system(size: 28, weight: .semibold, design: .rounded))
                 .monospacedDigit()
-            Text(unit)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(highlighted ? Color.mint : .white.opacity(0.52))
+                .foregroundStyle(Color.primary)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
-        .background(
-            highlighted ? Color.teal.opacity(0.20) : Color.white.opacity(0.07),
-            in: RoundedRectangle(cornerRadius: 20, style: .continuous)
+    }
+}
+
+private struct Milestone {
+    let target: Int
+    let remaining: Int
+    let progress: Double
+
+    static func current(for days: Int) -> Milestone {
+        let milestones = [1, 3, 7, 14, 30, 60, 90, 100, 180, 365, 500, 730, 1_000]
+        let target = milestones.first(where: { $0 > days }) ?? ((days / 365) + 1) * 365
+        let previous = milestones.last(where: { $0 <= days }) ?? 0
+        let span = max(1, target - previous)
+        let progress = min(1, max(0, Double(days - previous) / Double(span)))
+
+        return Milestone(
+            target: target,
+            remaining: max(0, target - days),
+            progress: progress
         )
-        .overlay {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(highlighted ? Color.mint.opacity(0.25) : .white.opacity(0.07), lineWidth: 1)
-        }
     }
 }
 
@@ -235,4 +238,3 @@ private struct ElapsedTime {
         seconds = totalSeconds % 60
     }
 }
-

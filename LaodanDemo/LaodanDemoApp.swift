@@ -6,46 +6,39 @@ struct QuitSmokingDurationApp: App {
     init() {
         UIScrollView.appearance().bounces = false
 
-        let navy = UIColor(red: 0.055, green: 0.09, blue: 0.18, alpha: 1)
-        let coral = UIColor(red: 0.96, green: 0.31, blue: 0.22, alpha: 1)
-        let warmWhite = UIColor(red: 0.965, green: 0.95, blue: 0.91, alpha: 1)
+        let ink = UIColor(red: 0.18, green: 0.23, blue: 0.28, alpha: 1)
+        let accent = UIColor(red: 0.22, green: 0.40, blue: 0.58, alpha: 1)
+        let muted = UIColor(red: 0.40, green: 0.45, blue: 0.49, alpha: 1)
+        let background = UIColor(red: 0.97, green: 0.975, blue: 0.97, alpha: 1)
 
-        let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.backgroundColor = navy
-        tabBarAppearance.shadowColor = .clear
-        tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor.white.withAlphaComponent(0.48)
-        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
-            .foregroundColor: UIColor.white.withAlphaComponent(0.48)
-        ]
-        tabBarAppearance.stackedLayoutAppearance.selected.iconColor = coral
-        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: coral,
-            .font: UIFont.systemFont(ofSize: 10, weight: .bold)
-        ]
-        UITabBar.appearance().standardAppearance = tabBarAppearance
-        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        let tab = UITabBarAppearance()
+        tab.configureWithOpaqueBackground()
+        tab.backgroundColor = .white
+        tab.shadowColor = UIColor.black.withAlphaComponent(0.04)
+        for item in [tab.stackedLayoutAppearance, tab.inlineLayoutAppearance, tab.compactInlineLayoutAppearance] {
+            item.normal.iconColor = muted
+            item.normal.titleTextAttributes = [.foregroundColor: muted]
+            item.selected.iconColor = accent
+            item.selected.titleTextAttributes = [.foregroundColor: accent]
+        }
+        UITabBar.appearance().standardAppearance = tab
+        UITabBar.appearance().scrollEdgeAppearance = tab
+        UITabBar.appearance().tintColor = accent
 
-        let navigationAppearance = UINavigationBarAppearance()
-        navigationAppearance.configureWithOpaqueBackground()
-        navigationAppearance.backgroundColor = warmWhite
-        navigationAppearance.shadowColor = .clear
-        navigationAppearance.largeTitleTextAttributes = [
-            .foregroundColor: navy,
-            .font: UIFont.systemFont(ofSize: 34, weight: .black)
+        let navigation = UINavigationBarAppearance()
+        navigation.configureWithOpaqueBackground()
+        navigation.backgroundColor = background
+        navigation.shadowColor = .clear
+        navigation.titleTextAttributes = [
+            .foregroundColor: ink,
+            .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
         ]
-        navigationAppearance.titleTextAttributes = [
-            .foregroundColor: navy,
-            .font: UIFont.systemFont(ofSize: 17, weight: .bold)
-        ]
-        UINavigationBar.appearance().standardAppearance = navigationAppearance
-        UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
+        UINavigationBar.appearance().standardAppearance = navigation
+        UINavigationBar.appearance().scrollEdgeAppearance = navigation
     }
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+        WindowGroup { ContentView() }
     }
 }
 

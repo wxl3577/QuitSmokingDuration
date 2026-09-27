@@ -25,6 +25,11 @@ private struct MainTabView: View {
                     Label("进度", systemImage: "chart.bar.fill")
                 }
 
+            ReinforcementTabView()
+                .tabItem {
+                    Label("巩固", systemImage: "book.closed.fill")
+                }
+
             SettingsView(startTimestamp: $startTimestamp)
                 .tabItem {
                     Label("设置", systemImage: "slider.horizontal.3")
@@ -129,7 +134,6 @@ private struct DashboardView: View {
                         durationCard(elapsed)
                         milestoneCard(milestone)
                         startDateCard
-                        ReinforcementHomeCard()
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 18)

@@ -1,0 +1,30 @@
+name: LaodanDemo
+
+options:
+  bundleIdPrefix: com.laodan.demo
+  deploymentTarget:
+    iOS: "15.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+targets:
+  LaodanDemo:
+    type: application
+    platform: iOS
+    sources:
+      - path: LaodanDemo
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.laodan.demo
+        PRODUCT_NAME: LaodanDemo
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Laodan Demo"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: NO
+        CODE_SIGN_STYLE: Automatic

@@ -79,10 +79,13 @@ private struct StartSetupView: View {
                             in: ...Date(),
                             displayedComponents: [.date, .hourAndMinute]
                         )
-                        .datePickerStyle(.compact)
+                        .datePickerStyle(.wheel)
                         .labelsHidden()
+                        .environment(\.locale, Locale(identifier: "zh_CN"))
                         .accentColor(AppTheme.accent)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 190)
+                        .clipped()
                     }
                     .padding(22)
                     .background(Color.white)
@@ -384,7 +387,13 @@ private struct SettingsView: View {
                 in: ...Date(),
                 displayedComponents: [.date, .hourAndMinute]
             )
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .environment(\.locale, Locale(identifier: "zh_CN"))
             .accentColor(AppTheme.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 190)
+            .clipped()
 
             Button {
                 startTimestamp = draftDate.timeIntervalSince1970
@@ -473,7 +482,7 @@ private enum DateTextFormatter {
     static let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "yyyy年M月d日 HH:mm"
+        formatter.dateFormat = "yyyy年M月d号 HH时mm分"
         return formatter
     }()
 

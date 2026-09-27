@@ -92,106 +92,53 @@ private struct StartSetupView: View {
             AppTheme.pageBackground.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    Spacer(minLength: 32)
-
-                    ZStack {
-                        Circle()
-                            .fill(AppTheme.accent.opacity(0.12))
-                            .frame(width: 82, height: 82)
-
-                        Image(systemName: "leaf.fill")
-                            .font(.system(size: 34, weight: .semibold))
-                            .foregroundColor(AppTheme.accent)
-                    }
-
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("鱼头戒烟")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundColor(AppTheme.ink)
-
-                        Text(startTimestamp > 0
-                            ? "再补充两项吸烟信息，就能实时计算你省下的钱。"
-                            : "记录开始时间和过去的吸烟习惯，之后每一秒都会被认真保存。")
-                            .font(.system(size: 17))
-                            .foregroundColor(AppTheme.secondaryText)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .lineSpacing(4)
-                    }
+                VStack(alignment: .leading, spacing: 20) {
+                    setupHero
 
                     VStack(alignment: .leading, spacing: 18) {
-                        Label("我从这里开始", systemImage: "calendar.badge.clock")
-                            .font(.headline)
-                            .foregroundColor(AppTheme.ink)
-
+                        sectionTitle(index: "01", title: "选择开始时间", color: AppTheme.teal)
                         ChineseDateTimePicker(selection: $selectedDate)
                     }
                     .padding(22)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                    .background(AppTheme.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(alignment: .leading) {
+                        Rectangle()
+                            .fill(AppTheme.teal)
+                            .frame(width: 5)
                     }
-                    .shadow(color: Color.black.opacity(0.05), radius: 20, y: 10)
 
                     VStack(alignment: .leading, spacing: 20) {
-                        Label("以前的吸烟习惯", systemImage: "banknote.fill")
-                            .font(.headline)
-                            .foregroundColor(AppTheme.ink)
-
-                        Divider()
+                        sectionTitle(index: "02", title: "填写过去的习惯", color: AppTheme.sun)
 
                         Stepper(value: $draftDailyCount, in: 1...100) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("每日烟量")
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundColor(AppTheme.ink)
-                                    Text("按每天平均数量填写")
-                                        .font(.caption)
-                                        .foregroundColor(AppTheme.secondaryText)
-                                }
-
-                                Spacer()
-
-                                Text("\(draftDailyCount) 根")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .monospacedDigit()
-                                    .foregroundColor(AppTheme.accent)
-                            }
+                            settingRow(
+                                title: "每日烟量",
+                                detail: "按每天平均数量填写",
+                                value: "\(draftDailyCount) 根",
+                                color: AppTheme.coral
+                            )
                         }
 
-                        Divider()
+                        Rectangle().fill(AppTheme.line).frame(height: 1)
 
                         Stepper(value: $draftPackPrice, in: 1...500, step: 0.5) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("每盒价格")
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundColor(AppTheme.ink)
-                                    Text("每盒按20根计算")
-                                        .font(.caption)
-                                        .foregroundColor(AppTheme.secondaryText)
-                                }
-
-                                Spacer()
-
-                                Text("¥\(MoneyText.price(draftPackPrice))")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                    .monospacedDigit()
-                                    .foregroundColor(AppTheme.accent)
-                            }
+                            settingRow(
+                                title: "每盒价格",
+                                detail: "每盒按 20 根计算",
+                                value: "¥\(MoneyText.price(draftPackPrice))",
+                                color: AppTheme.teal
+                            )
                         }
                     }
                     .padding(22)
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                    .background(AppTheme.card)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(alignment: .leading) {
+                        Rectangle()
+                            .fill(AppTheme.sun)
+                            .frame(width: 5)
                     }
-                    .shadow(color: Color.black.opacity(0.05), radius: 20, y: 10)
 
                     Button {
                         startTimestamp = selectedDate.timeIntervalSince1970
@@ -199,26 +146,103 @@ private struct StartSetupView: View {
                         cigarettePackPrice = draftPackPrice
                     } label: {
                         HStack {
-                            Text(startTimestamp > 0 ? "保存并继续" : "开始记录")
-                                .font(.headline)
+                            Text(startTimestamp > 0 ? "保存并继续" : "开始我的无烟生活")
+                                .font(.system(size: 17, weight: .bold))
                             Spacer()
-                            Image(systemName: "arrow.right")
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 17, weight: .bold))
                         }
                         .foregroundColor(.white)
                         .padding(.horizontal, 22)
-                        .frame(height: 58)
-                        .background(AppTheme.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .frame(height: 60)
+                        .background(AppTheme.coral)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
 
-                    Text("数据仅保存在你的设备中")
+                    Label("数据只保存在这台设备上", systemImage: "lock.fill")
                         .font(.caption)
                         .foregroundColor(AppTheme.secondaryText)
                         .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
                 .padding(.bottom, 36)
             }
+        }
+    }
+
+    private var setupHero: some View {
+        ZStack(alignment: .bottomTrailing) {
+            AppTheme.navy
+
+            Circle()
+                .fill(AppTheme.coral)
+                .frame(width: 124, height: 124)
+                .offset(x: 42, y: 48)
+
+            Circle()
+                .fill(AppTheme.sun)
+                .frame(width: 24, height: 24)
+                .offset(x: -36, y: -28)
+
+            VStack(alignment: .leading, spacing: 14) {
+                Text("鱼头戒烟")
+                    .font(.system(size: 14, weight: .bold))
+                    .tracking(3)
+                    .foregroundColor(AppTheme.sun)
+
+                Text(startTimestamp > 0 ? "补全信息，\n继续向前。" : "把戒烟，\n变成看得见的进步。")
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .foregroundColor(.white)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(startTimestamp > 0
+                    ? "填写烟量和价格后，首页会立即计算累计节省。"
+                    : "从一个明确的时间开始，记录每一天、每一笔节省。")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.72))
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.trailing, 54)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .frame(minHeight: 250)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private func sectionTitle(index: String, title: String, color: Color) -> some View {
+        HStack(spacing: 10) {
+            Text(index)
+                .font(.caption.weight(.black))
+                .foregroundColor(AppTheme.navy)
+                .frame(width: 34, height: 28)
+                .background(color)
+
+            Text(title)
+                .font(.headline)
+                .foregroundColor(AppTheme.ink)
+        }
+    }
+
+    private func settingRow(title: String, detail: String, value: String, color: Color) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundColor(AppTheme.ink)
+                Text(detail)
+                    .font(.caption)
+                    .foregroundColor(AppTheme.secondaryText)
+            }
+
+            Spacer()
+
+            Text(value)
+                .font(.system(size: 18, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .foregroundColor(color)
         }
     }
 }
@@ -253,88 +277,82 @@ private struct DashboardView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 15, style: .continuous)
-                    .fill(AppTheme.accent)
-                    .frame(width: 50, height: 50)
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 8) {
+                    Rectangle()
+                        .fill(AppTheme.coral)
+                        .frame(width: 22, height: 5)
 
-                Image(systemName: "leaf.fill")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.white)
-            }
+                    Text("鱼头戒烟")
+                        .font(.caption.weight(.black))
+                        .tracking(2.5)
+                        .foregroundColor(AppTheme.coral)
+                }
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text("鱼头戒烟")
-                    .font(.system(size: 25, weight: .bold, design: .rounded))
+                Text("无烟进度")
+                    .font(.system(size: 30, weight: .black, design: .rounded))
                     .foregroundColor(AppTheme.ink)
-
-                Text("今天也比昨天更自由")
-                    .font(.subheadline)
-                    .foregroundColor(AppTheme.secondaryText)
             }
 
             Spacer()
+
+            Text("LIVE")
+                .font(.caption2.weight(.black))
+                .tracking(1.5)
+                .foregroundColor(AppTheme.navy)
+                .padding(.horizontal, 11)
+                .padding(.vertical, 7)
+                .background(AppTheme.sun)
         }
     }
 
     private func durationCard(_ elapsed: ElapsedTime) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("无烟生活")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.white.opacity(0.72))
+        ZStack(alignment: .topTrailing) {
+            AppTheme.navy
 
-                Spacer()
+            Circle()
+                .fill(AppTheme.teal)
+                .frame(width: 112, height: 112)
+                .offset(x: 42, y: -46)
 
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(AppTheme.highlight)
-                        .frame(width: 7, height: 7)
-                    Text("进行中")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.white.opacity(0.9))
+            Circle()
+                .fill(AppTheme.coral)
+                .frame(width: 34, height: 34)
+                .offset(x: -26, y: 42)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("已经坚持")
+                    .font(.subheadline.weight(.bold))
+                    .foregroundColor(.white.opacity(0.68))
+
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("\(elapsed.days)")
+                        .font(.system(size: 88, weight: .black, design: .rounded))
+                        .tracking(-4)
+                        .monospacedDigit()
+                        .minimumScaleFactor(0.52)
+                        .lineLimit(1)
+
+                    Text("天")
+                        .font(.title2.weight(.black))
+                        .foregroundColor(AppTheme.sun)
                 }
+                .foregroundColor(.white)
+                .padding(.top, 3)
+
+                HStack(spacing: 0) {
+                    TimeValue(value: elapsed.hours, label: "小时", light: true)
+                    lightDivider
+                    TimeValue(value: elapsed.minutes, label: "分钟", light: true)
+                    lightDivider
+                    TimeValue(value: elapsed.seconds, label: "秒", light: true)
+                }
+                .padding(.top, 20)
             }
-
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("\(elapsed.days)")
-                    .font(.system(size: 82, weight: .bold, design: .rounded))
-                    .tracking(-3)
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.55)
-                    .lineLimit(1)
-
-                Text("天")
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(AppTheme.highlight)
-            }
-            .foregroundColor(.white)
-            .padding(.top, 10)
-
-            Rectangle()
-                .fill(Color.white.opacity(0.14))
-                .frame(height: 1)
-                .padding(.vertical, 20)
-
-            HStack(spacing: 0) {
-                TimeValue(value: elapsed.hours, label: "小时", light: true)
-                lightDivider
-                TimeValue(value: elapsed.minutes, label: "分钟", light: true)
-                lightDivider
-                TimeValue(value: elapsed.seconds, label: "秒", light: true)
-            }
+            .padding(24)
         }
-        .padding(24)
-        .background(
-            LinearGradient(
-                colors: [AppTheme.deepGreen, AppTheme.accent],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .shadow(color: AppTheme.deepGreen.opacity(0.2), radius: 24, y: 14)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
     }
 
     private var lightDivider: some View {
@@ -348,98 +366,90 @@ private struct DashboardView: View {
         let avoidedCigarettes = elapsedSeconds / 86_400 * Double(dailyCigaretteCount)
         let savedMoney = avoidedCigarettes / 20 * cigarettePackPrice
 
-        return VStack(alignment: .leading, spacing: 16) {
+        return VStack(alignment: .leading, spacing: 18) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("累计省下")
-                        .font(.subheadline)
-                        .foregroundColor(AppTheme.secondaryText)
-                    Text("截至现在的实时估算")
-                        .font(.caption)
-                        .foregroundColor(AppTheme.secondaryText)
-                }
+                Text("累计省下")
+                    .font(.caption.weight(.black))
+                    .tracking(2)
+                    .foregroundColor(AppTheme.navy.opacity(0.72))
 
                 Spacer()
 
-                Image(systemName: "banknote.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(AppTheme.accent)
-                    .frame(width: 44, height: 44)
-                    .background(AppTheme.accent.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 16, weight: .black))
+                    .foregroundColor(AppTheme.coral)
+                    .frame(width: 38, height: 38)
+                    .background(AppTheme.navy)
+                    .clipShape(Circle())
             }
 
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text("¥")
-                    .font(.title2.weight(.semibold))
-                    .foregroundColor(AppTheme.accent)
+                    .font(.title2.weight(.black))
+                    .foregroundColor(AppTheme.navy.opacity(0.7))
 
                 Text(MoneyText.amount(savedMoney))
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .font(.system(size: 48, weight: .black, design: .rounded))
                     .monospacedDigit()
-                    .foregroundColor(AppTheme.ink)
+                    .foregroundColor(AppTheme.navy)
                     .minimumScaleFactor(0.65)
                     .lineLimit(1)
             }
 
             Text("按每日 \(dailyCigaretteCount) 根、每盒 ¥\(MoneyText.price(cigarettePackPrice))（20根）计算")
                 .font(.caption)
-                .foregroundColor(AppTheme.secondaryText)
+                .foregroundColor(AppTheme.navy.opacity(0.7))
         }
-        .padding(21)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
-        }
+        .padding(22)
+        .background(AppTheme.sun)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func milestoneCard(_ milestone: Milestone) -> some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("下一个里程碑")
-                        .font(.subheadline)
-                        .foregroundColor(AppTheme.secondaryText)
+                    Text("NEXT / 下一个目标")
+                        .font(.caption.weight(.black))
+                        .tracking(1.2)
+                        .foregroundColor(AppTheme.teal)
                     Text("坚持到 \(milestone.target) 天")
-                        .font(.headline)
+                        .font(.title3.weight(.black))
                         .foregroundColor(AppTheme.ink)
                 }
 
                 Spacer()
 
                 Text("\(Int(milestone.progress * 100))%")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .black, design: .rounded))
                     .monospacedDigit()
-                    .foregroundColor(AppTheme.accent)
+                    .foregroundColor(AppTheme.coral)
             }
 
             ProgressView(value: milestone.progress)
-                .tint(AppTheme.accent)
-                .scaleEffect(x: 1, y: 1.8, anchor: .center)
+                .tint(AppTheme.teal)
+                .scaleEffect(x: 1, y: 2.2, anchor: .center)
 
-            Text("还差 \(milestone.remaining) 天，保持现在的节奏。")
+            Text("还差 \(milestone.remaining) 天。不用冲刺，只要不回头。")
                 .font(.caption)
                 .foregroundColor(AppTheme.secondaryText)
         }
-        .padding(21)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+        .padding(22)
+        .background(AppTheme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(alignment: .top) {
+            Rectangle().fill(AppTheme.teal).frame(height: 5)
         }
     }
 
     private var startDateCard: some View {
         HStack(spacing: 15) {
             Image(systemName: "calendar")
-                .font(.system(size: 19, weight: .semibold))
-                .foregroundColor(AppTheme.accent)
-                .frame(width: 44, height: 44)
-                .background(AppTheme.accent.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                .font(.system(size: 18, weight: .black))
+                .foregroundColor(AppTheme.navy)
+                .frame(width: 42, height: 42)
+                .background(AppTheme.coral)
+                .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("开始时间")
@@ -454,12 +464,8 @@ private struct DashboardView: View {
             Spacer(minLength: 0)
         }
         .padding(18)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
-        }
+        .background(AppTheme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
@@ -537,33 +543,33 @@ private struct SettingsView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 13) {
                 Image(systemName: "calendar.badge.clock")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(AppTheme.accent)
+                    .font(.system(size: 20, weight: .black))
+                    .foregroundColor(AppTheme.navy)
                     .frame(width: 44, height: 44)
-                    .background(AppTheme.accent.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .background(AppTheme.sun)
+                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("开始戒烟时间")
                         .font(.headline)
-                        .foregroundColor(AppTheme.ink)
+                        .foregroundColor(.white)
                     Text("修改后，统计会立即重新计算")
                         .font(.caption)
-                        .foregroundColor(AppTheme.secondaryText)
+                        .foregroundColor(.white.opacity(0.62))
                 }
             }
 
-            Divider()
+            Rectangle().fill(Color.white.opacity(0.14)).frame(height: 1)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("当前开始时间")
                     .font(.caption)
-                    .foregroundColor(AppTheme.secondaryText)
+                    .foregroundColor(.white.opacity(0.58))
 
                 Text(DateTextFormatter.string(from: Date(timeIntervalSince1970: startTimestamp)))
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .font(.system(size: 18, weight: .black, design: .rounded))
                     .monospacedDigit()
-                    .foregroundColor(AppTheme.ink)
+                    .foregroundColor(.white)
             }
 
             Button {
@@ -571,32 +577,28 @@ private struct SettingsView: View {
                 isEditingStartDate = true
             } label: {
                 Label("修改戒烟时间", systemImage: "pencil")
-                    .font(.headline)
+                    .font(.headline.weight(.bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
-                    .background(AppTheme.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(AppTheme.coral)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
-        .padding(20)
-        .background(Color.white)
+        .padding(22)
+        .background(AppTheme.navy)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
-        }
     }
 
     private var smokingProfileCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(spacing: 13) {
                 Image(systemName: "banknote.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(AppTheme.accent)
+                    .font(.system(size: 20, weight: .black))
+                    .foregroundColor(AppTheme.navy)
                     .frame(width: 44, height: 44)
-                    .background(AppTheme.accent.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    .background(AppTheme.teal)
+                    .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("省钱计算设置")
@@ -608,7 +610,7 @@ private struct SettingsView: View {
                 }
             }
 
-            Divider()
+            Rectangle().fill(AppTheme.line).frame(height: 1)
 
             Stepper(value: $dailyCigaretteCount, in: 1...100) {
                 HStack {
@@ -617,13 +619,13 @@ private struct SettingsView: View {
                         .foregroundColor(AppTheme.ink)
                     Spacer()
                     Text("\(dailyCigaretteCount) 根")
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 18, weight: .black, design: .rounded))
                         .monospacedDigit()
-                        .foregroundColor(AppTheme.accent)
+                        .foregroundColor(AppTheme.coral)
                 }
             }
 
-            Divider()
+            Rectangle().fill(AppTheme.line).frame(height: 1)
 
             Stepper(value: $cigarettePackPrice, in: 1...500, step: 0.5) {
                 HStack {
@@ -637,18 +639,17 @@ private struct SettingsView: View {
                     }
                     Spacer()
                     Text("¥\(MoneyText.price(cigarettePackPrice))")
-                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .font(.system(size: 18, weight: .black, design: .rounded))
                         .monospacedDigit()
-                        .foregroundColor(AppTheme.accent)
+                        .foregroundColor(AppTheme.teal)
                 }
             }
         }
-        .padding(20)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+        .padding(22)
+        .background(AppTheme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(alignment: .top) {
+            Rectangle().fill(AppTheme.teal).frame(height: 5)
         }
     }
 
@@ -668,20 +669,16 @@ private struct SettingsView: View {
             } label: {
                 Label("重置戒烟记录", systemImage: "arrow.counterclockwise")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundColor(Color.red.opacity(0.82))
+                    .foregroundColor(AppTheme.coral)
                     .frame(maxWidth: .infinity)
                     .frame(height: 48)
-                    .background(Color.red.opacity(0.07))
+                    .background(AppTheme.coral.opacity(0.10))
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
         }
         .padding(20)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.black.opacity(0.045), lineWidth: 1)
-        }
+        .background(AppTheme.card)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
@@ -698,11 +695,10 @@ private struct EditStartDateView: View {
                 VStack(spacing: 18) {
                     ChineseDateTimePicker(selection: $selectedDate)
                         .padding(20)
-                        .background(Color.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+                        .background(AppTheme.card)
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(alignment: .leading) {
+                            Rectangle().fill(AppTheme.teal).frame(width: 5)
                         }
 
                     Spacer(minLength: 0)
@@ -712,12 +708,12 @@ private struct EditStartDateView: View {
                         dismiss()
                     } label: {
                         Text("保存并重新计算")
-                            .font(.headline)
+                            .font(.headline.weight(.bold))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
-                            .background(AppTheme.accent)
-                            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                            .background(AppTheme.coral)
+                            .clipShape(RoundedRectangle(cornerRadius: 15, style: .continuous))
                     }
                 }
                 .padding(20)
@@ -800,7 +796,7 @@ private struct TimeValue: View {
     var body: some View {
         VStack(spacing: 5) {
             Text(String(format: "%02d", value))
-                .font(.system(size: 27, weight: .bold, design: .rounded))
+                .font(.system(size: 27, weight: .black, design: .rounded))
                 .monospacedDigit()
                 .foregroundColor(light ? .white : AppTheme.ink)
             Text(label)
@@ -811,13 +807,21 @@ private struct TimeValue: View {
     }
 }
 
-private enum AppTheme {
-    static let accent = Color(red: 0.07, green: 0.43, blue: 0.34)
-    static let deepGreen = Color(red: 0.035, green: 0.18, blue: 0.17)
-    static let highlight = Color(red: 0.73, green: 0.91, blue: 0.65)
-    static let ink = Color(red: 0.08, green: 0.12, blue: 0.12)
-    static let secondaryText = Color(red: 0.38, green: 0.43, blue: 0.42)
-    static let pageBackground = Color(red: 0.955, green: 0.965, blue: 0.95)
+enum AppTheme {
+    static let navy = Color(red: 0.055, green: 0.09, blue: 0.18)
+    static let coral = Color(red: 0.96, green: 0.31, blue: 0.22)
+    static let teal = Color(red: 0.10, green: 0.67, blue: 0.61)
+    static let sun = Color(red: 0.98, green: 0.76, blue: 0.20)
+    static let sky = Color(red: 0.31, green: 0.58, blue: 0.96)
+    static let ink = Color(red: 0.07, green: 0.09, blue: 0.15)
+    static let secondaryText = Color(red: 0.36, green: 0.38, blue: 0.43)
+    static let pageBackground = Color(red: 0.965, green: 0.95, blue: 0.91)
+    static let card = Color(red: 1.0, green: 0.995, blue: 0.98)
+    static let line = Color(red: 0.88, green: 0.86, blue: 0.81)
+
+    static let accent = coral
+    static let deepGreen = navy
+    static let highlight = sun
 }
 
 private enum MoneyText {

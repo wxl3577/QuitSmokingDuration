@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-ios:
-    name: Build unsigned iOS demo
+    name: Build 戒烟时长 iOS app
     runs-on: macos-latest
     timeout-minutes: 45
 
@@ -28,8 +28,8 @@ jobs:
       - name: Build unsigned app
         run: |
           xcodebuild \
-            -project LaodanDemo.xcodeproj \
-            -scheme LaodanDemo \
+            -project QuitSmokingDuration.xcodeproj \
+            -scheme QuitSmokingDuration \
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
@@ -41,7 +41,7 @@ jobs:
 
       - name: Package unsigned IPA
         run: |
-          APP_PATH="$GITHUB_WORKSPACE/build/Build/Products/Release-iphoneos/LaodanDemo.app"
+          APP_PATH="$GITHUB_WORKSPACE/build/Build/Products/Release-iphoneos/QuitSmokingDuration.app"
 
           if [ ! -d "$APP_PATH" ]; then
             echo "Compiled app was not found at: $APP_PATH"
@@ -52,13 +52,13 @@ jobs:
           cp -R "$APP_PATH" "$GITHUB_WORKSPACE/ipa/Payload/"
 
           cd "$GITHUB_WORKSPACE/ipa"
-          zip -qry "$GITHUB_WORKSPACE/LaodanDemo-unsigned.ipa" Payload
+          zip -qry "$GITHUB_WORKSPACE/QuitSmokingDuration-unsigned.ipa" Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LaodanDemo-unsigned-${{ github.run_number }}
-          path: LaodanDemo-unsigned.ipa
+          name: QuitSmokingDuration-unsigned-${{ github.run_number }}
+          path: QuitSmokingDuration-unsigned.ipa
           if-no-files-found: error
           compression-level: 0
           retention-days: 7

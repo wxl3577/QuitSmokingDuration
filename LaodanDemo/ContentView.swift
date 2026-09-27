@@ -129,6 +129,7 @@ private struct DashboardView: View {
                         durationCard(elapsed)
                         milestoneCard(milestone)
                         startDateCard
+                        ReinforcementHomeCard()
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 18)

@@ -73,19 +73,7 @@ private struct StartSetupView: View {
                             .font(.headline)
                             .foregroundColor(AppTheme.ink)
 
-                        DatePicker(
-                            "开始戒烟时间",
-                            selection: $selectedDate,
-                            in: ...Date(),
-                            displayedComponents: [.date, .hourAndMinute]
-                        )
-                        .datePickerStyle(.wheel)
-                        .labelsHidden()
-                        .environment(\.locale, Locale(identifier: "zh_CN"))
-                        .accentColor(AppTheme.accent)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 190)
-                        .clipped()
+                        ChineseDateTimePicker(selection: $selectedDate)
                     }
                     .padding(22)
                     .background(Color.white)
@@ -312,6 +300,7 @@ private struct DashboardView: View {
 private struct SettingsView: View {
     @Binding var startTimestamp: Double
     @State private var draftDate: Date
+    @State private var isEditingStartDate = false
     @State private var showSavedNotice = false
     @State private var showResetConfirmation = false
 
@@ -357,6 +346,16 @@ private struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .onAppear {
+            draftDate = Date(timeIntervalSince1970: startTimestamp)
+        }
+        .sheet(isPresented: $isEditingStartDate) {
+            EditStartDateView(selectedDate: $draftDate) {
+                startTimestamp = draftDate.timeIntervalSince1970
+                showSavedNotice = true
+                isEditingStartDate = false
+            }
+        }
     }
 
     private var settingsCard: some View {
@@ -381,25 +380,22 @@ private struct SettingsView: View {
 
             Divider()
 
-            DatePicker(
-                "日期和时间",
-                selection: $draftDate,
-                in: ...Date(),
-                displayedComponents: [.date, .hourAndMinute]
-            )
-            .datePickerStyle(.wheel)
-            .labelsHidden()
-            .environment(\.locale, Locale(identifier: "zh_CN"))
-            .accentColor(AppTheme.accent)
-            .frame(maxWidth: .infinity)
-            .frame(height: 190)
-            .clipped()
+            VStack(alignment: .leading, spacing: 6) {
+                Text("当前开始时间")
+                    .font(.caption)
+                    .foregroundColor(AppTheme.secondaryText)
+
+                Text(DateTextFormatter.string(from: Date(timeIntervalSince1970: startTimestamp)))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundColor(AppTheme.ink)
+            }
 
             Button {
-                startTimestamp = draftDate.timeIntervalSince1970
-                showSavedNotice = true
+                draftDate = Date(timeIntervalSince1970: startTimestamp)
+                isEditingStartDate = true
             } label: {
-                Text("保存修改")
+                Label("修改戒烟时间", systemImage: "pencil")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -448,6 +444,113 @@ private struct SettingsView: View {
                 .stroke(Color.black.opacity(0.045), lineWidth: 1)
         }
     }
+}
+
+private struct EditStartDateView: View {
+    @Binding var selectedDate: Date
+    let onSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                AppTheme.pageBackground.ignoresSafeArea()
+
+                VStack(spacing: 18) {
+                    ChineseDateTimePicker(selection: $selectedDate)
+                        .padding(20)
+                        .background(Color.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .stroke(Color.black.opacity(0.045), lineWidth: 1)
+                        }
+
+                    Spacer(minLength: 0)
+
+                    Button {
+                        onSave()
+                        dismiss()
+                    } label: {
+                        Text("保存并重新计算")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(AppTheme.accent)
+                            .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+                    }
+                }
+                .padding(20)
+            }
+            .navigationTitle("修改戒烟时间")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+}
+
+private struct ChineseDateTimePicker: View {
+    @Binding var selection: Date
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("日期（上下滑动可选择年份）")
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(AppTheme.ink)
+
+            DatePicker(
+                "选择年月日",
+                selection: $selection,
+                in: DatePickerLimits.earliest...Date(),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .environment(\.locale, Locale(identifier: "zh_CN"))
+            .accentColor(AppTheme.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 135)
+            .clipped()
+
+            Divider()
+
+            Text("时间")
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(AppTheme.ink)
+
+            DatePicker(
+                "选择时分",
+                selection: $selection,
+                displayedComponents: .hourAndMinute
+            )
+            .datePickerStyle(.wheel)
+            .labelsHidden()
+            .environment(\.locale, Locale(identifier: "zh_CN"))
+            .accentColor(AppTheme.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 110)
+            .clipped()
+        }
+    }
+}
+
+private enum DatePickerLimits {
+    static let earliest: Date = {
+        var components = DateComponents()
+        components.calendar = Calendar(identifier: .gregorian)
+        components.year = 1900
+        components.month = 1
+        components.day = 1
+        return components.date ?? .distantPast
+    }()
 }
 
 private struct TimeValue: View {
